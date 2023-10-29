@@ -1,0 +1,40 @@
+org: sep29
+app: project-29-api
+service: project-29-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: dev
+  region: ap-southeast-2
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:PutObject"
+        - "s3:GetObject"
+        # - "sns:Publish"
+      Resource: arn:aws:s3:::project-29-s3-bucket/*
+
+functions:
+  hello:
+    handler: handler.hello
+  
+  getSignedUrl:
+    handler: handler.getSignedUrl
+    events:
+      - http:
+          path: s3url
+          method: get
+          cors: true
+
+  executePayload:
+    handler: handler.executePayload
+    # destinations:
+    #   onSuccess: <your-sns-topic-arn>
+    events:
+      - s3:
+          bucket: project-29-s3-bucket
+          event: s3:ObjectCreated:*
